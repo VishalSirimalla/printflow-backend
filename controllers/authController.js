@@ -5,7 +5,7 @@ const Student = require('../models/Student');
 const Admin = require('../models/Admin');
 const { sendPasswordResetEmail } = require('../services/emailService');
 
-const googleClient = new OAuth2Client();
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateToken = (id, role) =>
   jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
@@ -46,7 +46,7 @@ const googleLoginStudent = async (req, res, next) => {
 
     const ticket = await googleClient.verifyIdToken({
       idToken: credential,
-      audience: clientId,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
@@ -84,10 +84,10 @@ const googleLoginAdmin = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Google login credentials are missing' });
     }
 
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: clientId,
-    });
+  const ticket = await googleClient.verifyIdToken({
+    idToken: credential,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
 
     const payload = ticket.getPayload();
     if (!payload?.email) {
